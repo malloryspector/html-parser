@@ -18,8 +18,8 @@
 #define ITALIC -3
 #define PARAGRAPH -4
 #define LIST_ITEM -5
-// catch all for any tag not yet supported
-#define UNSUPPORTED_TAG -6 
+#define UNORDERED_LIST -6
+#define UNSUPPORTED_TAG -7 // catch all for any tag not yet supported
 
 /** 
  * Struct to keep track of what is at the top of the stack
@@ -111,6 +111,7 @@ void print_emulated_opening_tag(int tag) {
       	case ITALIC:
       		printf("_");
       		break;
+      	case UNORDERED_LIST:	
       	case PARAGRAPH:
       		printf("\n");
       		break;
@@ -120,7 +121,7 @@ void print_emulated_opening_tag(int tag) {
       	default:
       		printf("");
       		break;
-	}	
+	}
 }
 
 void print_emulated_closing_tag(int tag) {
@@ -131,7 +132,9 @@ void print_emulated_closing_tag(int tag) {
       	case ITALIC:
       		printf("_");
       		break;
+      	case H1:
       	case PARAGRAPH:
+      	case UNORDERED_LIST:
       	case LIST_ITEM:
       		printf("\n");
       		break;	
@@ -139,6 +142,31 @@ void print_emulated_closing_tag(int tag) {
       		printf("");
       		break;
 	}	
+}
+
+int get_tag_type(char tag_name[TAG_MAX_INPUT_SIZE]) {
+	char * h1 = "h1";
+	char * bold = "b";
+	char * italic = "i";
+	char * paragraph = "p";
+	char * list_item = "li";
+	char * unordered_list = "ul";
+
+	if (strcmp(tag_name, h1) == 0) {
+		return H1;
+	} else if (strcmp(tag_name, bold) == 0) {
+		return BOLD;
+	} else if (strcmp(tag_name, italic) == 0) {
+		return ITALIC;
+	} else if (strcmp(tag_name, paragraph) == 0) {
+		return PARAGRAPH;
+	} else if (strcmp(tag_name, list_item) == 0) {
+		return LIST_ITEM;
+	} else if (strcmp(tag_name, unordered_list) == 0){
+		return UNORDERED_LIST;
+	} else {
+		return UNSUPPORTED_TAG;
+	}
 }
 
 void print_html_as_text(char user_input[MAX_USER_INPUT]) {
@@ -149,11 +177,27 @@ void print_html_as_text(char user_input[MAX_USER_INPUT]) {
 	int skip = FALSE;
 
 	for (int i = 0; i < strlen(user_input); i++) {
+		char tag[10] = {0};
+		int t = 0;
+		int j = i + 1;
+
 		if (user_input[i] == '<') {
+			// get the tag type to emulate
+			while (user_input[j] != '>') {
+				if (user_input[j] == '/') {
+					j++;
+				} else {
+					tag[t] = user_input[j];
+					t++;
+					j++;
+				}
+			}
+			int tag_name = get_tag_type(tag);
+
 			if (user_input[i + 1] != '/') {
-				print_emulated_opening_tag(PARAGRAPH);
+				print_emulated_opening_tag(tag_name);
 			} else {
-				print_emulated_closing_tag(PARAGRAPH);
+				print_emulated_closing_tag(tag_name);
 			}
 			skip = TRUE;
 		} else if (skip && user_input[i] != '>') {
@@ -190,13 +234,19 @@ int main() {
 	struct tag_stack *stack = malloc(sizeof(struct tag_stack));
 	stack->head = NULL;
 
+	// begin parsing: loop through all user input
 	for (int i = 0; i < strlen(user_input); i++) {
+		// helper variables to keep track of each tag
 		char tag[10] = {0};
 		int t = 0;
+
+		// helper variable to loop through user input without 
+		// affecting the rest of the user input parsing
 		int j = i + 1;
 
 		if (user_input[i] == '<' && user_input[j] != '/') {
-			// opening or singleton tag
+			// if the opening '<' is not directly followed by a '/'
+			// then this is either an opening tag or a singleton tag
 			int tag_type = OPENING_TAG;
 			while (user_input[j] != '>') {
 				if (user_input[j] == '/') {
@@ -210,8 +260,9 @@ int main() {
 				stack = push(tag, tag_type, stack);
 			}
 		} else if (user_input[i] == '<' && user_input[j] == '/') {
-			// closing tag
-			j++; /* skip the backslash */
+			// if the opening '<' is directly followed by a '/'
+			// then this is a closing tag
+			j++; // add one to skip adding the '/' with the tag name
 			while (user_input[j] != '>') {
 				tag[t] = user_input[j];
 				t++;
@@ -223,11 +274,17 @@ int main() {
 			}
 		}
 	}
+
 	if (!is_empty(stack)) {
+		// if we have looped through all user input and the stack is not empty
+		// then there are missing closing tags in the HTML
 		print_stack_remainder(stack);
 	} else {
+		// if there is nothing left in the stack, the HTML has been successfully
+		// parsed and it is safe to try to emulate the html as text
 		print_html_as_text(user_input);
 	}
+
 	free_stack(stack);
 	return 0;
 }
