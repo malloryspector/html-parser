@@ -33,7 +33,7 @@ struct tag_stack {
  * Struct to keep track of the tag name and stack order
  */
 struct tag {
-	char tag_name[10];
+	int tag_name;
 	int tag_type;
 	struct tag *next;
 };
@@ -48,17 +48,17 @@ int is_empty(struct tag_stack *stack) {
 /**
  * Push the new tag name onto the tag stack
  */
-struct tag_stack *push(char tag_name[TAG_MAX_INPUT_SIZE], int tag_type, struct tag_stack *stack) {
+struct tag_stack *push(int tag_name, int tag_type, struct tag_stack *stack) {
 	if (is_empty(stack)) {
 		// if the tag stack is empty then this is the first element
 		stack->head = malloc(sizeof(struct tag));
-		strcpy(stack->head->tag_name, tag_name);
+		stack->head->tag_name = tag_name;
 		stack->head->tag_type = tag_type;
 		stack->head->next = NULL;
 		return stack;
 	}
 	struct tag *new_element = malloc(sizeof(struct tag));
-	strcpy(new_element->tag_name, tag_name);
+	new_element->tag_name = tag_name;
 	new_element->tag_type = tag_type;
 	new_element->next = stack->head;
 	stack->head = new_element;
@@ -89,14 +89,14 @@ void free_stack(struct tag_stack *stack) {
 	free(stack);
 }
 
-int compare_tags(struct tag *t, char tag_name[TAG_MAX_INPUT_SIZE]) {
-	if (strcmp(t->tag_name, tag_name) == 0) {
+int compare_tags(struct tag *t, int tag_name) {
+	if (t->tag_name == tag_name) {
 		return TRUE;
 	} else {
 		printf("--------------------------------------\n");
 		printf(" The following errors have been found \n");
 		printf("--------------------------------------\n\n");
-		printf("Missing %s tag.\n\n", tag_name);
+		printf("Missing tag.\n\n");
 		return FALSE;
 	}
 }
@@ -221,7 +221,7 @@ void print_stack_remainder(struct tag_stack *stack) {
 
 	while(!is_empty(stack)) {
 		struct tag *head = pop(stack);
-		printf("Missing closing </%s> tag.\n", head->tag_name);
+		printf("Missing closing </%d> tag.\n", head->tag_name);
 	}
 	printf("\n");
 }
@@ -285,8 +285,11 @@ int main() {
 				t++;
 				j++;
 			}
+
+			int tag_name = get_tag_type(tag);
+
 			if (tag_type == OPENING_TAG) {
-				stack = push(tag, tag_type, stack);
+				stack = push(tag_name, tag_type, stack);
 			}
 		} else if (user_input[i] == '<' && user_input[j] == '/') {
 			// if the opening '<' is directly followed by a '/'
@@ -297,8 +300,11 @@ int main() {
 				t++;
 				j++;
 			}
+
+			int tag_name = get_tag_type(tag);
+
 			struct tag *head = pop(stack);
-			if (!compare_tags(head, tag)) {
+			if (!compare_tags(head, tag_name)) {
 				return 0;
 			}
 		}
