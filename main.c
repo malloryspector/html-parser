@@ -4,6 +4,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define MAX_FILE_WEB_LENGTH 100
 #define MAX_USER_INPUT 1000000
 #define TAG_MAX_INPUT_SIZE 10
 #define OPENING_TAG 2
@@ -145,12 +146,12 @@ void print_emulated_closing_tag(int tag) {
 }
 
 int get_tag_type(char tag_name[TAG_MAX_INPUT_SIZE]) {
-	char * h1 = "h1";
-	char * bold = "b";
-	char * italic = "i";
-	char * paragraph = "p";
-	char * list_item = "li";
-	char * unordered_list = "ul";
+	char h1[] = "h1";
+	char bold[] = "b";
+	char italic[] = "i";
+	char paragraph[] = "p";
+	char list_item[] = "li";
+	char unordered_list[] = "ul";
 
 	if (strcmp(tag_name, h1) == 0) {
 		return H1;
@@ -176,7 +177,7 @@ void print_html_as_text(char user_input[MAX_USER_INPUT]) {
 
 	int skip = FALSE;
 
-	for (int i = 0; i < strlen(user_input); i++) {
+	for (int i = 0; i < strlen(user_input) - 1; i++) {
 		char tag[10] = {0};
 		int t = 0;
 		int j = i + 1;
@@ -204,7 +205,9 @@ void print_html_as_text(char user_input[MAX_USER_INPUT]) {
 			continue;
 		} else if (user_input[i] == '>') {
 			skip = FALSE;
-		} else {	
+		} else if (user_input[i] == '\t' || user_input[i] == '\n') {
+			continue;
+		} else {
 			printf("%c", user_input[i]);
 		}
 	}
@@ -225,17 +228,43 @@ void print_stack_remainder(struct tag_stack *stack) {
 
 int main() {
 
-	// get HTML user input
+	// get file for user input
+	char input_to_parse[MAX_FILE_WEB_LENGTH];
+	printf("Enter file name: ");
+	fgets(input_to_parse, MAX_FILE_WEB_LENGTH, stdin);
+
+	int len = strlen(input_to_parse);
+	if (input_to_parse[len - 1] == '\n') {
+		input_to_parse[len - 1] = '\0';
+	}
+
+	FILE *file_input;
+	file_input = fopen(input_to_parse, "r");
+	if (file_input == NULL) {
+		printf("No file '%s' found!\n", input_to_parse);
+	}
+
 	char user_input[MAX_USER_INPUT];
-	printf("Enter an HTML string: ");
-	fgets(user_input, MAX_USER_INPUT, stdin);
+	int index = 0;
+	while (TRUE) {
+		if (feof(file_input)) {
+			user_input[index] = '\0';
+			break;
+		} else {
+			user_input[index] = fgetc(file_input);
+			index++;
+		}
+	}
+	fclose(file_input);
+
+	int total_input_length = index;
 
 	// create the tag stack and set its head to NULL
 	struct tag_stack *stack = malloc(sizeof(struct tag_stack));
 	stack->head = NULL;
 
 	// begin parsing: loop through all user input
-	for (int i = 0; i < strlen(user_input); i++) {
+	for (int i = 0; i < total_input_length - 1; i++) {
 		// helper variables to keep track of each tag
 		char tag[10] = {0};
 		int t = 0;
