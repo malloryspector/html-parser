@@ -49,7 +49,7 @@ struct tag {
  * Note: Function adapted from a class example
  */
 int is_empty(struct tag_stack *stack) {
-    return stack == NULL || stack->head == NULL;
+  return stack == NULL || stack->head == NULL;
 }
 
 /**
@@ -116,8 +116,6 @@ int compare_tags(struct tag *t, int tag_name) {
  * Helper for printing the emulated html
  */
 void print_emulated_opening_tag(int tag) {
-	// Note: Looked at how to use switch statements for this project
-	// https://www.tutorialspoint.com/cprogramming/switch_statement_in_c.htm
 	switch(tag) {
 		case H1:
 			printf("#");
@@ -130,21 +128,21 @@ void print_emulated_opening_tag(int tag) {
 			break;
 		case BOLD:
 			printf("*");
-      		break;
-      	case ITALIC:
-      		printf("_");
-      		break;
-      	case UNORDERED_LIST:
-      	case PARAGRAPH:
-      	case BREAK:
-      		printf("\n");
-      		break;
-      	case LIST_ITEM:
-      		printf("- ");
-      		break;
-      	default:
-      		printf("");
-      		break;
+  		break;
+  	case ITALIC:
+  		printf("_");
+  		break;
+  	case UNORDERED_LIST:
+  	case PARAGRAPH:
+  	case BREAK:
+  		printf("\n");
+  		break;
+  	case LIST_ITEM:
+  		printf("- ");
+  		break;
+  	default:
+  		printf("");
+  		break;
 	}
 }
 
@@ -152,26 +150,24 @@ void print_emulated_opening_tag(int tag) {
  * Helper for printing the emulated html
  */
 void print_emulated_closing_tag(int tag) {
-	// Note: Looked at how to use switch statements for this project
-	// https://www.tutorialspoint.com/cprogramming/switch_statement_in_c.htm
 	switch(tag) {
 		case BOLD:
 			printf("*");
-      		break;
-      	case ITALIC:
-      		printf("_");
-      		break;
-      	case H1:
-      	case H2:
-      	case H3:
-      	case PARAGRAPH:
-      	case UNORDERED_LIST:
-      	case LIST_ITEM:
-      		printf("\n");
-      		break;
-      	default:
-      		printf("");
-      		break;
+  		break;
+  	case ITALIC:
+  		printf("_");
+  		break;
+  	case H1:
+  	case H2:
+  	case H3:
+  	case PARAGRAPH:
+  	case UNORDERED_LIST:
+  	case LIST_ITEM:
+  		printf("\n");
+  		break;
+  	default:
+  		printf("");
+  		break;
 	}
 }
 
@@ -208,7 +204,6 @@ int get_tag_id(char tag_name[TAG_MAX_INPUT_SIZE]) {
 	} else {
 		return UNSUPPORTED_TAG;
 	}
-
 }
 
 /*
@@ -216,8 +211,7 @@ int get_tag_id(char tag_name[TAG_MAX_INPUT_SIZE]) {
  */
 int get_tag_type(int tag_id) {
 	int tag_type;
-	// Note: Looked at how to use switch statements for this project
-	// https://www.tutorialspoint.com/cprogramming/switch_statement_in_c.htm
+
 	switch(tag_id) {
 		case LINK:
 		case META:
@@ -229,6 +223,7 @@ int get_tag_type(int tag_id) {
 			tag_type = OPENING_TAG;
 			break;
 	}
+
 	return tag_type;
 }
 
