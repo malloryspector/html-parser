@@ -2,7 +2,7 @@
 
 Final project for CS5002 Discrete and Data Structures. This project is an HTML parser, which takes in an html file and either outputs an error if tags are not being used correctly, or emulates their effect in text if tags are used correctly.
 
-Version 1.0 supports the following tags: <div>, <h1>, <h2>, <h3>, <p>, <br>, <img>, <b>, <i>, <ul>, <li>, <link>, <meta>.
+Version 1.0 supports the following tags: div, h1, h2, h3, p, br, img, b, i, ul, li, link, meta
 
 ### How to Use It
 
